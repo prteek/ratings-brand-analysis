@@ -13,3 +13,6 @@
   fits any odds ratio; the app then says the ratings can't pin down a difference.
 - **Reference lines drawn as traces.** Vertical shapes on a log axis didn't render in gr.Plot, so the threshold,
   equal-preference, best-fit and interval lines are line traces.
+- **2026-10-26: Paper and dataset moved in** — regression_room is being split into one repo per post. The ratings write-up now lives in `paper/` (verbatim) with its frozen results, so the unseeded bootstrap keeps the published numbers; the re-rendered PDF matches the published one (73 numbers, 1,576 words). The app's model moved into the `ratings_compare` package; the paper keeps its own inline grid-based code rather than importing it, because switching to exact root-finding would change the paper's numbers.
+- **`data/ratings.csv` is the single copy of the data** — the paper reads it through the link `paper/ratings.csv`, the tests check the app's default example against it, and CI publishes it as the Hugging Face dataset `prteek/ratings-compare`. The source repository (MengtingWan/marketBias) is Apache-2.0, so the subset is shared under Apache-2.0 with attribution.
+- **CI publishes the Space and the dataset** — same pattern as sparse-panel-modelling; the Space job runs the tests first and the upload includes the `ratings_compare` package next to `app.py`.

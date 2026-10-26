@@ -1,6 +1,6 @@
 import numpy as np
 
-from beta_binomial import CHI2_95, compare, fit_product, profile_loglik
+from ratings_compare.beta_binomial import CHI2_95, compare, fit_product, profile_loglik
 
 # Apple (item 4501) and Philips (item 3700) headphones, 1..5 star counts, as in the paper
 APPLE = [11, 11, 8, 13, 33]

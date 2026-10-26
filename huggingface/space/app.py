@@ -11,7 +11,7 @@ import plotly.io as pio
 from plotly.subplots import make_subplots
 from scipy import stats
 
-from beta_binomial import CHI2_95, LOGIT_P, compare
+from ratings_compare.beta_binomial import CHI2_95, LOGIT_P, compare
 
 pio.templates.default = "ggplot2"
 

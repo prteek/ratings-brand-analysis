@@ -3,7 +3,8 @@
 Gradio app that answers "is one product really rated better?" from the 1★ to 5★ rating counts of two products.
 Each product is fitted with a beta-binomial model and the two are compared through the profile likelihood of the
 log odds ratio of a favourable outcome. Method from the blog post
-[ratings ~ brand](https://prteek.github.io/regression_room/posts/ratings_inference/).
+[ratings ~ brand](https://prteek.github.io/regression_room/posts/ratings_inference/)
+(paper on [alphaXiv](https://www.alphaxiv.org/abs/2610.ratings-brand-analysis)).
 
 Live: [huggingface.co/spaces/prteek/ratings-compare](https://huggingface.co/spaces/prteek/ratings-compare)
 

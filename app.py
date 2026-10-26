@@ -1,8 +1,8 @@
 """Gradio app: compare the 1–5 star ratings of two products with a beta-binomial model.
 
 Each product's ratings are modelled as beta-binomial (users differ in how much they like it), and the products are
-compared through the profile likelihood of the log odds ratio of a favourable outcome. Method: the post
-"ratings ~ brand" (POST_URL).
+compared through the profile likelihood of the log odds ratio of a favourable outcome. Method: the paper
+"Ratings ~ Brand, Analysis" (PAPER_URL).
 """
 import gradio as gr
 import numpy as np
@@ -15,7 +15,7 @@ from beta_binomial import CHI2_95, LOGIT_P, compare
 
 pio.templates.default = "ggplot2"
 
-POST_URL = "https://prteek.github.io/regression_room/posts/ratings_inference/"
+PAPER_URL = "https://www.alphaxiv.org/abs/2610.ratings-brand-analysis"
 STAR_LABELS = [f"{s}★" for s in range(1, 6)]
 COLOURS = ["#F8766D", "#00BFC4"]  # ggplot2's default two-group hues
 # The post's example: two pairs of headphones from the electronics ratings data
@@ -137,7 +137,7 @@ with gr.Blocks(title="Compare star ratings") as demo:
         "Enter how many 1★ to 5★ ratings two products have. Averages hide how differently people rate the same "
         "thing, so this fits a **beta-binomial** model to each product (users differ in how much they like it) and "
         "compares them through the **profile likelihood** of the odds ratio of a favourable outcome. "
-        f"Method: [ratings ~ brand]({POST_URL})."
+        f"Method: [Ratings ~ Brand, Analysis]({PAPER_URL})."
     )
     with gr.Row():
         with gr.Column():

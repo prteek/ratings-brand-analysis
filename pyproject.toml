@@ -1,0 +1,17 @@
+[project]
+name = "ratings-compare"
+version = "0.1.0"
+description = "Compare star ratings of two products with a beta-binomial model and profile likelihood"
+requires-python = ">=3.12"
+dependencies = [
+    "gradio>=6.30.0",
+    "numpy>=2.0",
+    "plotly>=5.24",
+    "scipy>=1.13",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

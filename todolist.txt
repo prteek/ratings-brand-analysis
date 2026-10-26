@@ -1,12 +1,9 @@
-Publish:
-  ☐ First CI run: needs the HF_TOKEN secret in this repo; check both workflows after merging to main
-  ☐ Remove the old root-level beta_binomial.py from the Space after the first CI deploy
-
 Backlog:
   ☐ Optional CSV upload that fills in the star counts
   ☐ Rating scales other than 1–5 stars
 
 Archive:
+  ✔ First CI run: Space (tests passed) and dataset published; old root-level beta_binomial.py removed from the Space @done(26-10-26)
   ✔ Rename the GitHub repo to prteek/ratings-brand-analysis (old URL redirects); Hugging Face repos keep ratings-compare @done(26-10-26)
   ✔ Move the paper and its data in; publish the dataset; CI for Space and dataset @done(26-10-26)
   ✔ Link the Space from the alphaXiv paper (shown under the abstract) @done(26-10-26)

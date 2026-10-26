@@ -20,7 +20,7 @@ configs:
 the data behind the paper [Ratings ~ Brand, Analysis](https://www.alphaxiv.org/abs/2610.ratings-brand-analysis) on
 alphaXiv, which compares how users rate two products with a beta-binomial model and profile likelihood, and the
 default example in the [ratings-compare Space](https://huggingface.co/spaces/prteek/ratings-compare).
-Code: [github.com/prteek/ratings-compare](https://github.com/prteek/ratings-compare).
+Code: [github.com/prteek/ratings-brand-analysis](https://github.com/prteek/ratings-brand-analysis).
 
 ## Source
 

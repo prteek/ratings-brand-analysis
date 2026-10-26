@@ -1,4 +1,4 @@
-# ratings-compare
+# ratings-brand-analysis
 
 Is one product really rated better? Each product's 1★ to 5★ ratings are fitted with a beta-binomial model (users
 differ in how much they like it), and two products are compared through the profile likelihood of the log odds
@@ -7,6 +7,7 @@ ratio of a favourable outcome. This repo holds everything for the paper
 its data, and an app built on the same model.
 
 **Live app:** https://huggingface.co/spaces/prteek/ratings-compare · **Data:** https://huggingface.co/datasets/prteek/ratings-compare
+(the Hugging Face repos keep the name `ratings-compare`)
 
 ## Layout
 

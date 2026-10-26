@@ -7,6 +7,7 @@ Backlog:
   ☐ Rating scales other than 1–5 stars
 
 Archive:
+  ✔ Rename the GitHub repo to prteek/ratings-brand-analysis (old URL redirects); Hugging Face repos keep ratings-compare @done(26-10-26)
   ✔ Move the paper and its data in; publish the dataset; CI for Space and dataset @done(26-10-26)
   ✔ Link the Space from the alphaXiv paper (shown under the abstract) @done(26-10-26)
   ✔ Build app and model with tests against the paper's numbers; visually checked locally @done(26-10-26)

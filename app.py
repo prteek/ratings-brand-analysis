@@ -18,7 +18,7 @@ pio.templates.default = "ggplot2"
 PAPER_URL = "https://www.alphaxiv.org/abs/2610.ratings-brand-analysis"
 STAR_LABELS = [f"{s}★" for s in range(1, 6)]
 COLOURS = ["#F8766D", "#00BFC4"]  # ggplot2's default two-group hues
-# The post's example: two pairs of headphones from the electronics ratings data
+# The paper's example: two pairs of headphones from the electronics ratings data
 DEFAULT_A = ("Apple headphones", [11, 11, 8, 13, 33])
 DEFAULT_B = ("Philips headphones", [2, 4, 7, 9, 16])
 FEW_RATINGS = 20

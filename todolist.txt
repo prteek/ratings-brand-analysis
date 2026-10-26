@@ -1,9 +1,7 @@
-Publish:
-  ☐ Link the Space from the ratings ~ brand blog post
-
 Backlog:
   ☐ Optional CSV upload that fills in the star counts
   ☐ Rating scales other than 1–5 stars
 
 Archive:
-  ✔ Build app and model with tests against the post's numbers; visually checked locally @done(26-10-26)
+  ✔ Link the Space from the alphaXiv paper (shown under the abstract) @done(26-10-26)
+  ✔ Build app and model with tests against the paper's numbers; visually checked locally @done(26-10-26)

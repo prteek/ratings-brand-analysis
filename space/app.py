@@ -22,6 +22,24 @@ COLOURS = ["#F8766D", "#00BFC4"]  # ggplot2's default two-group hues
 DEFAULT_A = ("Apple headphones", [11, 11, 8, 13, 33])
 DEFAULT_B = ("Philips headphones", [2, 4, 7, 9, 16])
 FEW_RATINGS = 20
+MODES = ["star counts", "total and % per star"]
+
+
+def counts_from_percentages(total, percentages) -> np.ndarray:
+    """Star counts from a total and the percentage of ratings at each star, as Amazon shows them.
+
+    The shown percentages are rounded and rarely add up to exactly 100, so they are rescaled to sum to 100 first.
+    """
+    pct = np.nan_to_num(np.array(percentages, float))
+    total = float(np.nan_to_num(total or 0))
+    if pct.sum() <= 0:
+        return np.zeros(len(pct))
+    return np.round(total * pct / pct.sum())
+
+
+def default_percentages(counts) -> list[int]:
+    counts = np.array(counts, float)
+    return [int(round(v)) for v in 100 * counts / counts.sum()]
 
 
 def fmt_or(theta):
@@ -110,12 +128,20 @@ def fit_figure(c, name_a, name_b) -> go.Figure:
     return fig
 
 
-def run(name_a, name_b, *counts):
+def run(mode, name_a, name_b, *values):
+    """values: counts A (5), counts B (5), total A, % A (5), total B, % B (5)."""
     name_a, name_b = (name_a or "Product A").strip(), (name_b or "Product B").strip()
-    ca = np.nan_to_num(np.array(counts[:5], float))
-    cb = np.nan_to_num(np.array(counts[5:], float))
-    if (ca < 0).any() or (cb < 0).any():
-        return "Counts can't be negative.", None, None, None
+    if mode == MODES[1]:
+        entered = np.nan_to_num(np.array(values[10:], float))
+        if (entered < 0).any():
+            return "Totals and percentages can't be negative.", None, None, None
+        ca = counts_from_percentages(values[10], values[11:16])
+        cb = counts_from_percentages(values[16], values[17:22])
+    else:
+        ca = np.nan_to_num(np.array(values[:5], float))
+        cb = np.nan_to_num(np.array(values[5:10], float))
+        if (ca < 0).any() or (cb < 0).any():
+            return "Counts can't be negative.", None, None, None
     if ca.sum() == 0 or cb.sum() == 0:
         return "Enter at least one rating for each product.", None, None, None
     c = compare(np.round(ca), np.round(cb))
@@ -125,25 +151,32 @@ def run(name_a, name_b, *counts):
 
 def counts_column(label, default):
     name = gr.Textbox(default[0], label=label)
-    with gr.Row():
+    with gr.Row(visible=True) as counts_row:
         boxes = [gr.Number(v, label=s, minimum=0, precision=0, min_width=60)
                  for s, v in zip(STAR_LABELS, default[1])]
-    return name, boxes
+    with gr.Column(visible=False) as pct_col:
+        total = gr.Number(sum(default[1]), label="total ratings", minimum=0, precision=0)
+        with gr.Row():
+            pct = [gr.Number(v, label=f"{s} %", minimum=0, maximum=100, min_width=60)
+                   for s, v in zip(STAR_LABELS, default_percentages(default[1]))]
+    return name, boxes, total, pct, counts_row, pct_col
 
 
 with gr.Blocks(title="Compare star ratings") as demo:
     gr.Markdown(
         "# Is one product really rated better?\n"
-        "Enter how many 1★ to 5★ ratings two products have. Averages hide how differently people rate the same "
+        "Enter how many 1★ to 5★ ratings two products have, or the total and the percentage at each star as Amazon "
+        "shows them. Averages hide how differently people rate the same "
         "thing, so this fits a **beta-binomial** model to each product (users differ in how much they like it) and "
         "compares them through the **profile likelihood** of the odds ratio of a favourable outcome. "
         f"Method: [Is one product really rated better?]({BLOG_URL})."
     )
+    mode = gr.Radio(MODES, value=MODES[0], label="Enter ratings as")
     with gr.Row():
         with gr.Column():
-            name_a, boxes_a = counts_column("Product A", DEFAULT_A)
+            name_a, boxes_a, total_a, pct_a, counts_row_a, pct_col_a = counts_column("Product A", DEFAULT_A)
         with gr.Column():
-            name_b, boxes_b = counts_column("Product B", DEFAULT_B)
+            name_b, boxes_b, total_b, pct_b, counts_row_b, pct_col_b = counts_column("Product B", DEFAULT_B)
     result = gr.Markdown()
     table = gr.Dataframe(headers=["product", "ratings", "mean stars", "preference p", "spread of p (SD)"],
                          interactive=False, show_label=False)
@@ -160,7 +193,13 @@ with gr.Blocks(title="Compare star ratings") as demo:
         "Wan, Ni, Misra & McAuley (2020), *Addressing Marketing Bias in Product Recommendations*, WSDM."
     )
 
-    inputs = [name_a, name_b, *boxes_a, *boxes_b]
+    def show_mode(m):
+        as_pct = m == MODES[1]
+        return [gr.Row(visible=not as_pct), gr.Column(visible=as_pct)] * 2
+
+    mode.change(show_mode, mode, [counts_row_a, pct_col_a, counts_row_b, pct_col_b])
+
+    inputs = [mode, name_a, name_b, *boxes_a, *boxes_b, total_a, *pct_a, total_b, *pct_b]
     outputs = [result, table, profile, fit]
     gr.on([c.change for c in inputs], run, inputs, outputs, trigger_mode="always_last")
     demo.load(run, inputs, outputs)

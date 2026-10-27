@@ -1,4 +1,4 @@
-"""The headphone ratings behind the paper (data/ratings.csv), published as the Hugging Face dataset.
+"""The headphone ratings behind the blog post (data/ratings.csv), published as the Hugging Face dataset.
 
 A subset of the Electronics ratings from Wan, Ni, Misra & McAuley (2020), "Addressing Marketing Bias in Product
 Recommendations", WSDM (github.com/MengtingWan/marketBias, Apache-2.0): every Headphones rating of the brands
@@ -9,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 
 RATINGS = Path(__file__).resolve().parents[1] / "data" / "ratings.csv"
-# The two products the paper compares
+# The two products the blog post compares
 APPLE, PHILIPS = 4501, 3700
 
 

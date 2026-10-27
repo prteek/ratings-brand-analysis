@@ -1,3 +1,6 @@
+Publish:
+  ☐ Publish the article at huggingface.co/blog/prteek/ratings-brand-analysis (render blog/index.qmd, paste the .md, upload assets/ figures)
+
 Backlog:
   ☐ Optional CSV upload that fills in the star counts
   ☐ Rating scales other than 1–5 stars

@@ -2,7 +2,7 @@ import numpy as np
 
 from ratings_compare.beta_binomial import CHI2_95, compare, fit_product, profile_loglik
 
-# Apple (item 4501) and Philips (item 3700) headphones, 1..5 star counts, as in the paper
+# Apple (item 4501) and Philips (item 3700) headphones, 1..5 star counts, as in the blog post
 APPLE = [11, 11, 8, 13, 33]
 PHILIPS = [2, 4, 7, 9, 16]
 
@@ -16,7 +16,7 @@ def test_single_product_matches_paper():
 
 def test_comparison_matches_paper():
     c = compare(APPLE, PHILIPS)
-    # the paper read these off a 20-point grid: MLE 0.316, 95% CI [-0.261, 0.893]
+    # the original write-up (an alphaXiv paper, since retired) read these off a 20-point grid: MLE 0.316, 95% CI [-0.261, 0.893]
     assert abs(c.theta - 0.316) < 0.06
     assert abs(c.ci[0] - (-0.261)) < 0.06 and abs(c.ci[1] - 0.893) < 0.06
     assert not c.excludes_zero

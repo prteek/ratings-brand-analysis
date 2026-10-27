@@ -9,11 +9,11 @@ def test_dataset_shape():
 
 
 def test_app_default_example_matches_the_data():
-    """The app opens with the paper's two products; their counts must come from the published data."""
+    """The app opens with the blog post's two products; their counts must come from the published data."""
     import importlib.util
     from pathlib import Path
 
-    spec = importlib.util.spec_from_file_location("app", Path(__file__).parents[1] / "huggingface/space/app.py")
+    spec = importlib.util.spec_from_file_location("app", Path(__file__).parents[1] / "space/app.py")
     app = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(app)
     r = load()

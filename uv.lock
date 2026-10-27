@@ -2578,15 +2578,15 @@ app = [
     { name = "huggingface-hub" },
     { name = "plotly" },
 ]
-dev = [
-    { name = "pytest" },
-]
-paper = [
+blog = [
     { name = "jupyter" },
     { name = "matplotlib" },
     { name = "pyyaml" },
-    { name = "rfuns" },
     { name = "seaborn" },
+    { name = "tabulate" },
+]
+dev = [
+    { name = "pytest" },
 ]
 
 [package.metadata]
@@ -2602,14 +2602,14 @@ app = [
     { name = "huggingface-hub", specifier = ">=0.30" },
     { name = "plotly", specifier = ">=5.24" },
 ]
-dev = [{ name = "pytest", specifier = ">=8" }]
-paper = [
+blog = [
     { name = "jupyter", specifier = ">=1.1" },
     { name = "matplotlib", specifier = ">=3.9" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "rfuns", specifier = ">=0.1.0" },
     { name = "seaborn", specifier = ">=0.13" },
+    { name = "tabulate", specifier = ">=0.9" },
 ]
+dev = [{ name = "pytest", specifier = ">=8" }]
 
 [[package]]
 name = "referencing"
@@ -2671,15 +2671,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/2c/06/37c1a5557acf449e8e406a830a05bf885ac47d33270aec454ef78675008d/rfc3987_syntax-1.1.0.tar.gz", hash = "sha256:717a62cbf33cffdd16dfa3a497d81ce48a660ea691b1ddd7be710c22f00b4a0d", size = 14239, upload-time = "2025-07-18T01:05:05.015Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl", hash = "sha256:6c3d97604e4c5ce9f714898e05401a0445a641cfa276432b0a648c80856f6a3f", size = 8046, upload-time = "2025-07-18T01:05:03.843Z" },
-]
-
-[[package]]
-name = "rfuns"
-version = "0.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/3a/97/4d4e7fae1047f203bf717f876bbcfa5cf3c6c47365b37db16110b388c74b/rfuns-0.1.0.tar.gz", hash = "sha256:2c4171137f3099fb9b428aa9ee82fad7b0a8d0f1fc4758a11a0fa38e1642ca2d", size = 20517, upload-time = "2026-05-20T03:29:26.241Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cc/18/06d157f93e1bf8a357fa23d857ff022d381fb2e342583f897301b14d1062/rfuns-0.1.0-py3-none-any.whl", hash = "sha256:2efc184f25c5eb63abf1273b27fc0c7c5bdfecc59383d0580414de93a9619824", size = 21815, upload-time = "2026-05-20T03:29:24.516Z" },
 ]
 
 [[package]]
@@ -2970,6 +2961,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/48/bb/3d8757f21e9a53d9035c9eb039a777047139a16bfdbedfc7a58241c3d914/starlette-1.10.0.tar.gz", hash = "sha256:b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b", size = 2734356, upload-time = "2026-10-24T15:04:12.342Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/2e/947cfe02def9371c07cd5bf5b6b61c829e9aecb9904db02a66cfafbc1eec/starlette-1.10.0-py3-none-any.whl", hash = "sha256:478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4", size = 80571, upload-time = "2026-10-24T15:04:10.371Z" },
+]
+
+[[package]]
+name = "tabulate"
+version = "0.10.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/58/8c37dea7bbf769b20d58e7ace7e5edfe65b849442b00ffcdd56be88697c6/tabulate-0.10.0.tar.gz", hash = "sha256:e2cfde8f79420f6deeffdeda9aaec3b6bc5abce947655d17ac662b126e48a60d", size = 91754, upload-time = "2026-03-04T18:55:34.402Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/99/55/db07de81b5c630da5cbf5c7df646580ca26dfaefa593667fc6f2fe016d2e/tabulate-0.10.0-py3-none-any.whl", hash = "sha256:f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3", size = 39814, upload-time = "2026-03-04T18:55:31.284Z" },
 ]
 
 [[package]]

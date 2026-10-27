@@ -1,0 +1,337 @@
+---
+# The blog post: `QUARTO_PYTHON=.venv/bin/python quarto render blog/index.qmd` (from the repo root) writes
+# ratings-brand-analysis.md next to this file, ready to paste into the Hugging Face article editor, with its figures
+# in assets/ (upload each in the editor, which replaces its local link). Code cells import ratings_compare.
+format:
+  gfm:
+    output-file: ratings-brand-analysis
+    wrap: preserve
+filters:
+  - _hf-markdown.lua  # inline maths as \\( ... \\)
+execute:
+  echo: false
+  warning: false
+  engine: jupyter
+---
+
+```{python}
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from IPython.display import Markdown, display
+from scipy import stats
+
+from ratings_compare.beta_binomial import CHI2_95, N, compare
+from ratings_compare.data import APPLE, PHILIPS, load, star_counts
+
+sns.set_theme(style="whitegrid")
+COLORS = {"Apple": "tab:blue", "Philips": "tab:orange"}
+
+# figures are saved next to the post; the article editor swaps each for its own link when it is uploaded
+ASSETS = Path("assets")
+ASSETS.mkdir(exist_ok=True)
+
+
+def figure(fig, name, alt):
+    fig.savefig(ASSETS / f"{name}.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    display(Markdown(f"![{alt}]({ASSETS}/{name}.png)"))
+
+
+ratings = load()
+counts = {
+    "Apple": star_counts(ratings, APPLE),
+    "Philips": star_counts(ratings, PHILIPS),
+}
+# 1-5 stars as 0-4 favourable outcomes out of N = 4
+favourable = {
+    brand: ratings.loc[ratings["item_id"] == item, "rating"].round().astype(int) - 1
+    for brand, item in [("Apple", APPLE), ("Philips", PHILIPS)]
+}
+c = compare(counts["Apple"], counts["Philips"])
+fits = {"Apple": c.a, "Philips": c.b}
+```
+
+# Infering latent user preference from product ratings
+
+## Comparing Star Ratings with a Beta-Binomial Model and Profile Likelihood
+
+Two pairs of headphones: one averages `{python} f"{c.a.mean_stars:.2f}"` stars, the other `{python} f"{c.b.mean_stars:.2f}"`. Is the second one actually liked more, or is that just noise? Star ratings make this harder than it looks. Some users are generous raters, some are harsh, and a product's ratings are a mix of both. A mean rating throws that structure away.
+
+This post builds a small likelihood model that keeps it: each user has their own preference for a product, preferences vary across users following a Beta distribution, and two products are compared through the **log odds ratio** of a favourable rating, with a likelihood-based 95% interval. Everything is open:
+
+- 🎮 **Try it:** [Space: ratings-compare](https://huggingface.co/spaces/prteek/ratings-compare): enter the star counts of any two products
+- 📊 **Data:** [datasets/prteek/ratings-compare](https://huggingface.co/datasets/prteek/ratings-compare)
+- 💻 **Code:** [github.com/prteek/ratings-brand-analysis](https://github.com/prteek/ratings-brand-analysis)
+
+## TL;DR
+
+- Treat a rating of 1★ to 5★ as 0 to 4 favourable outcomes out of 4, and let each user's probability of a favourable outcome come from a **Beta distribution**. The ratings are then **beta-binomial**, with a closed-form likelihood.
+- Reparameterise the two products in terms of the **log odds ratio** $\theta$ of a favourable outcome, and get its **profile likelihood** by maximising out everything else.
+- On Apple vs Philips headphones, Philips comes out ahead (odds ratio `{python} f"{c.odds_ratio:.2f}"`), but the 95% likelihood interval for $\theta$ includes zero: the data can't tell the two apart. A bootstrap of the mean ratings agrees.
+
+## The data
+
+The ratings come from the Electronics dataset of Wan, Ni, Misra & McAuley (2020). We take two headphones: an Apple product with `{python} sum(counts["Apple"])` ratings and a Philips product with `{python} sum(counts["Philips"])`.
+
+```{python}
+table = pd.DataFrame(
+    {f"{s}★": [counts["Apple"][s - 1], counts["Philips"][s - 1]] for s in range(1, 6)},
+    index=["Apple", "Philips"],
+)
+table["ratings"] = table.sum(axis=1)
+table["mean stars"] = [
+    f"{np.dot(counts[b], range(1, 6)) / sum(counts[b]):.2f}" for b in table.index
+]
+display(Markdown(table.rename_axis("product").to_markdown()))
+```
+
+```{python}
+share = pd.DataFrame(
+    [
+        {"stars": f"{s}★", "brand": b, "share": counts[b][s - 1] / sum(counts[b])}
+        for b in counts
+        for s in range(1, 6)
+    ]
+)
+fig, ax = plt.subplots(figsize=(8, 3.6))
+sns.barplot(share, x="stars", y="share", hue="brand", palette=COLORS, alpha=0.8, ax=ax)
+ax.set_xlabel("")
+ax.set_ylabel("share of the product's ratings")
+ax.legend(title="")
+figure(fig, "ratings-by-brand", "Share of 1★ to 5★ ratings for each product")
+```
+
+The shapes differ. Apple's ratings are spread across the whole scale, with many 1★ and 2★ ratings next to a large block of 5★. Philips has proportionally fewer low ratings. But with this few ratings, how much of that difference is real?
+
+## A first look: bootstrap the mean
+
+```{python}
+diff = favourable["Philips"].mean() - favourable["Apple"].mean()
+bts = stats.bootstrap(
+    (favourable["Apple"], favourable["Philips"]),
+    statistic=lambda a, p: np.mean(p) - np.mean(a),
+    rng=np.random.default_rng(0),
+)
+lo, hi = bts.confidence_interval
+fig, ax = plt.subplots(figsize=(8, 3.6))
+sns.histplot(bts.bootstrap_distribution, bins=30, color="0.6", ax=ax)
+ax.axvline(
+    diff, color="tab:red", ls="--", lw=2, label=f"observed difference = {diff:.2f}"
+)
+ax.axvspan(
+    lo, hi, color="tab:red", alpha=0.08, label=f"95% interval [{lo:.2f}, {hi:.2f}]"
+)
+ax.axvline(0, color="black", lw=0.8)
+ax.set_xlabel("difference in mean rating (Philips − Apple, stars)")
+ax.legend(fontsize=8, loc="upper left")
+figure(fig, "bootstrap", "Bootstrap distribution of the difference in mean rating")
+```
+
+The simplest check resamples each product's ratings and recomputes the difference in mean rating. Philips is ahead by `{python} f"{diff:.2f}"` stars, but the bootstrap 95% interval runs from `{python} f"{lo:.2f}"` to `{python} f"{hi:.2f}"` and includes zero. This is about what a *rating ~ brand* regression would say too.
+
+The mean, though, treats a product as a single number. It ignores the fact that users differ, and it can't say *how* the products differ. A model of the ratings themselves can.
+
+## Each user has a preference
+
+Treat a rating of $s$ stars as $y = s - 1$ favourable outcomes out of $n = 4$, and say a user with preference $p$ rates as if $y \sim \text{Binomial}(4, p)$. Ratings are not literally counts of four yes/no trials; this is a working approximation that gives interpretable parameters and sensible pooling.
+
+A single rating then says something about that user's $p$, but not much. For a user who gave 4★ ($y = 3$), the likelihood $L(p) = p^3 (1 - p)$ peaks at $p = 0.75$ yet leaves a wide range of preferences plausible. (For a refresher on likelihood, see this [likelihood primer](https://prteek.github.io/regression_room/posts/likelihood_primer/).)
+
+```{python}
+p = np.linspace(0.001, 0.999, 300)
+fig, ax = plt.subplots(figsize=(8, 3.4))
+ax.plot(
+    p, stats.binom.pmf(3, N, p) / stats.binom.pmf(3, N, 0.75), color="black", lw=1.8
+)
+ax.axvline(0.75, color="tab:red", ls="--", lw=1)
+ax.set_xlabel("preference p")
+ax.set_ylabel("likelihood (relative to max)")
+figure(
+    fig,
+    "one-user-likelihood",
+    "Likelihood of one user's preference p after a 4-star rating",
+)
+```
+
+## The beta-binomial model
+
+Different users have different preferences, so let $p$ itself vary across a product's users: $p \sim \text{Beta}(\alpha, \beta)$. A user's rating is then a binomial count with a random $p$, and its marginal probability integrates over that uncertainty:
+
+$$
+P(Y = y) = \int_0^1 \binom{n}{y} p^y (1 - p)^{n - y} \, \text{Beta}(p \mid \alpha, \beta) \, dp
+= \binom{n}{y} \frac{B(y + \alpha,\ n - y + \beta)}{B(\alpha, \beta)}
+$$
+
+where $B$ is the beta function. The closed form means no numerical integration, just a few log-gamma calls:
+
+```python
+def log_pmf(alpha: float, beta: float) -> np.ndarray:
+    """Beta-binomial log-probability of 0..N favourable outcomes."""
+    k = STARS
+    log_comb = gammaln(N + 1) - gammaln(k + 1) - gammaln(N - k + 1)
+    return log_comb + betaln(k + alpha, N - k + beta) - betaln(alpha, beta)
+```
+
+It is convenient to write each product's Beta in terms of its **mean preference** $\bar p = \alpha / (\alpha + \beta)$ and **dispersion** $d = \alpha + \beta$. A small $d$ means users disagree a lot; as $d \to \infty$ everyone shares the same $p$ and the model becomes a plain binomial. Fitting each product by maximum likelihood:
+
+```{python}
+rows = []
+for b, f in fits.items():
+    q = stats.beta(f.alpha, f.beta).ppf([0.025, 0.975])
+    rows.append(
+        {
+            "product": b,
+            "α": f"{f.alpha:.3f}",
+            "β": f"{f.beta:.3f}",
+            "mean preference": f"{f.p:.3f}",
+            "dispersion": f"{f.d:.2f}",
+            "95% of users' p": f"{q[0]:.2f} – {q[1]:.2f}",
+        }
+    )
+display(Markdown(pd.DataFrame(rows).to_markdown(index=False, disable_numparse=True)))
+```
+
+```{python}
+fig, ax = plt.subplots(figsize=(8, 3.6))
+p = np.linspace(0.005, 0.995, 400)
+for b, f in fits.items():
+    ax.plot(
+        p,
+        stats.beta.pdf(p, f.alpha, f.beta),
+        color=COLORS[b],
+        lw=2,
+        label=f"{b}: Beta({f.alpha:.2f}, {f.beta:.2f})",
+    )
+ax.set_ylim(0, 4)
+ax.set_xlabel("preference p")
+ax.set_ylabel("density across users")
+ax.legend(fontsize=8)
+figure(
+    fig,
+    "preference-distributions",
+    "Fitted distribution of users' preference p for each product",
+)
+```
+
+The fits tell a more detailed story than the means. Apple's users are split: with $\alpha$ and $\beta$ both below 1, the Beta is U-shaped, so many users either love it or dislike it. Philips's users agree more (larger dispersion) around a slightly higher mean preference.
+
+The model reproduces the observed counts closely:
+
+```{python}
+check = pd.DataFrame(
+    {
+        "stars": [f"{s}★" for s in range(1, 6)],
+        **{
+            col: v
+            for b, f in fits.items()
+            for col, v in [
+                (f"{b} observed", f.counts.astype(int)),
+                (f"{b} fitted", [f"{x:.1f}" for x in f.fitted_counts()]),
+            ]
+        },
+    }
+)
+display(Markdown(check.to_markdown(index=False)))
+```
+
+## Comparing the two products
+
+### The log odds ratio
+
+To compare two proportions $p_1$ (Apple) and $p_2$ (Philips), Pawitan (2013) recommends working with the **log odds ratio**
+
+$$
+\theta = \log \frac{p_2 / (1 - p_2)}{p_1 / (1 - p_1)} = \operatorname{logit} p_2 - \operatorname{logit} p_1 ,
+$$
+
+with the log odds of one product, $\eta = \operatorname{logit} p_1$, as a nuisance parameter. $\theta = 0$ means equal preference, and $\theta > 0$ favours Philips. Its likelihood is more regular than that of the difference or the ratio of proportions, especially in small samples.
+
+### Profile likelihood
+
+Here $p_1$ and $p_2$ are the two products' mean preferences $\bar p$, and each product also has its own dispersion. To get a likelihood for $\theta$ alone, fix it, maximise the joint likelihood over everything else ($\bar p_1, d_1, d_2$; $\bar p_2$ follows from $\theta$), and repeat over a range of $\theta$:
+
+$$
+L_p(\theta) = \max_{\bar p_1,\, d_1,\, d_2} L(\theta, \bar p_1, d_1, d_2 \mid \text{ratings})
+$$
+
+```python
+def profile_loglik(theta: float, a: ProductFit, b: ProductFit) -> float:
+    """Maximise the joint log-likelihood over (p_A, d_A, d_B) with theta fixed; p_B follows from theta."""
+    def neg(x):
+        la, log_da, log_db = x
+        return -(loglik(a.counts, expit(la), np.exp(log_da))
+                 + loglik(b.counts, expit(np.clip(la + theta, *LOGIT_P)), np.exp(log_db)))
+    ...
+```
+
+The 95% likelihood interval is every $\theta$ whose likelihood-ratio statistic $2\{\ell_p(\hat\theta) - \ell_p(\theta)\}$ stays below $\chi^2_{1, 0.95} \approx 3.84$. Its ends are found by root-finding on that statistic rather than read off a grid.
+
+```{python}
+lo_t, hi_t = c.ci
+fig, ax = plt.subplots(figsize=(9, 4.2))
+ax.plot(
+    c.profile_theta,
+    c.profile_loglik,
+    color="black",
+    lw=2,
+    label="profile log-likelihood",
+)
+ax.axhline(-CHI2_95 / 2, color="tab:orange", ls=":", lw=1.5, label="95% threshold")
+ax.axvline(c.theta, color="tab:red", ls="--", lw=1.5, label=f"MLE θ = {c.theta:.2f}")
+ax.axvspan(
+    lo_t,
+    hi_t,
+    color="tab:green",
+    alpha=0.1,
+    label=f"95% interval [{lo_t:.2f}, {hi_t:.2f}]",
+)
+ax.axvline(0, color="0.4", lw=0.8)
+ax.set_ylim(-6, 0.5)
+ax.set_xlabel("log odds ratio θ (Philips vs Apple)")
+ax.set_ylabel("log-likelihood − max")
+ax.legend(fontsize=8, loc="lower center")
+figure(
+    fig,
+    "profile-likelihood",
+    "Profile likelihood of the log odds ratio between Philips and Apple",
+)
+```
+
+### What it says
+
+The maximum likelihood estimate of $\theta$ is `{python} f"{c.theta:.2f}"`: the odds of a favourable outcome are about `{python} f"{c.odds_ratio:.2f}"` times higher for Philips. But the 95% likelihood interval, `{python} f"[{c.ci[0]:.2f}, {c.ci[1]:.2f}]"`, comfortably includes $\theta = 0$. As with the bootstrap, the ratings don't show a real difference between the two products.
+
+The two approaches also agree on the size of the gap. In the data, Philips's mean rating (on the 0–4 scale) is `{python} f"{favourable['Philips'].mean() / favourable['Apple'].mean():.3f}"` times Apple's; in the model, the ratio of mean preferences is `{python} f"{c.b.p / c.a.p:.3f}"`.
+
+## Lessons learned
+
+- **Model the raters, not just the ratings.** A Beta distribution of preferences captures that users differ, and the fitted shape is informative in itself: Apple's U-shaped Beta says its users are split, which no mean rating would show.
+- **Use the closed form.** The beta-binomial PMF needs only log-gamma functions, so the likelihood is cheap enough to maximise thousands of times for a profile.
+- **Parameterise for the question.** Writing the model in terms of the log odds ratio puts the quantity of interest in a single parameter, so its profile likelihood and interval answer the question directly.
+- **Report the interval, not just the estimate.** A point estimate of 1.35 for the odds ratio sounds like a win for Philips; the interval says the data are equally consistent with no difference.
+- **Find interval ends exactly.** Root-finding on the likelihood-ratio statistic is more accurate and cheaper than reading the ends off a grid of profile values.
+- **Know the limits.** With very few ratings, or all of them at one end of the scale, a U-shaped Beta can fit almost any odds ratio and the interval doesn't close. Saying so is better than reporting a number.
+
+## Try it on your own products
+
+The model is in the `ratings_compare` package. Give it the number of 1★ to 5★ ratings for two products:
+
+```python
+from ratings_compare.beta_binomial import compare
+
+c = compare([11, 11, 8, 13, 33], [2, 4, 7, 9, 16])  # Apple, Philips
+print(c.theta, c.odds_ratio, c.ci, c.excludes_zero)
+```
+
+Or open the [Space](https://huggingface.co/spaces/prteek/ratings-compare), type in the star counts of any two products, and get a plain-language verdict with the odds ratio, its 95% likelihood interval, the profile likelihood and a check of each product's fit.
+
+## References
+
+- Pawitan, Y. (2013). *In All Likelihood: Statistical Modelling and Inference Using Likelihood*. Oxford University Press.
+- Casella, G. & Berger, R. L. (2002). *Statistical Inference*, 2nd ed. Cengage.
+- Virtanen et al. (2020). SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python. *Nature Methods* 17: 261–272. [doi:10.1038/s41592-019-0686-2](https://doi.org/10.1038/s41592-019-0686-2)
+- Wan, Ni, Misra & McAuley (2020). Addressing Marketing Bias in Product Recommendations. *WSDM*. [github.com/MengtingWan/marketBias](https://github.com/MengtingWan/marketBias)

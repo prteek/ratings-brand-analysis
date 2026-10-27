@@ -17,8 +17,8 @@ configs:
 # Headphone star ratings
 
 7,681 star ratings of 46 headphones from three brands (Philips, Jabra and Apple) by 7,605 users, 2005–2018. This is
-the data behind the paper [Ratings ~ Brand, Analysis](https://www.alphaxiv.org/abs/2610.ratings-brand-analysis) on
-alphaXiv, which compares how users rate two products with a beta-binomial model and profile likelihood, and the
+the data behind the blog post [Is One Product Really Rated Better?](https://huggingface.co/blog/prteek/ratings-brand-analysis) on
+Hugging Face, which compares how users rate two products with a beta-binomial model and profile likelihood, and the
 default example in the [ratings-compare Space](https://huggingface.co/spaces/prteek/ratings-compare).
 Code: [github.com/prteek/ratings-brand-analysis](https://github.com/prteek/ratings-brand-analysis).
 
@@ -46,7 +46,7 @@ released. This subset is shared under the same licence.
 
 See the source paper for how `model_attr`, `user_attr` and `split` were derived.
 
-The paper compares Apple item 4501 (76 ratings) with Philips item 3700 (38 ratings). In the paper, a rating of s
+The blog post compares Apple item 4501 (76 ratings) with Philips item 3700 (38 ratings). There, a rating of s
 stars is modelled as s − 1 favourable outcomes out of 4.
 
 ## Citation

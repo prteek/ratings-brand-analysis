@@ -1,6 +1,6 @@
 """Beta-binomial comparison of two products' 1–5 star ratings.
 
-Following the paper "Ratings ~ Brand, Analysis" (www.alphaxiv.org/abs/2610.ratings-brand-analysis):
+Following the blog post "Is One Product Really Rated Better?" (huggingface.co/blog/prteek/ratings-brand-analysis):
 - a rating of s stars is treated as k = s - 1 favourable outcomes out of N = 4;
 - each user's preference p is drawn from Beta(alpha, beta) for that product, so ratings are beta-binomial;
 - each product is parameterised by its mean preference p = alpha / (alpha + beta) and dispersion d = alpha + beta;

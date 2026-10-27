@@ -7,16 +7,16 @@ APPLE = [11, 11, 8, 13, 33]
 PHILIPS = [2, 4, 7, 9, 16]
 
 
-def test_single_product_matches_paper():
+def test_single_product_matches_original():
     fit = fit_product(APPLE)
     assert np.isclose(fit.alpha, 0.6689, atol=2e-3)
     assert np.isclose(fit.beta, 0.3553, atol=2e-3)
     assert np.allclose(fit.fitted_counts(), [11.5, 9.1, 9.7, 12.8, 32.9], atol=0.1)
 
 
-def test_comparison_matches_paper():
+def test_comparison_matches_original():
     c = compare(APPLE, PHILIPS)
-    # the original write-up (an alphaXiv paper, since retired) read these off a 20-point grid: MLE 0.316, 95% CI [-0.261, 0.893]
+    # the original write-up read these off a 20-point grid: MLE 0.316, 95% CI [-0.261, 0.893]
     assert abs(c.theta - 0.316) < 0.06
     assert abs(c.ci[0] - (-0.261)) < 0.06 and abs(c.ci[1] - 0.893) < 0.06
     assert not c.excludes_zero

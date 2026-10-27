@@ -8,6 +8,5 @@ Backlog:
 Archive:
   ✔ First CI run: Space (tests passed) and dataset published; old root-level beta_binomial.py removed from the Space @done(26-10-26)
   ✔ Rename the GitHub repo to prteek/ratings-brand-analysis (old URL redirects); Hugging Face repos keep ratings-compare @done(26-10-26)
-  ✔ Move the paper and its data in; publish the dataset; CI for Space and dataset @done(26-10-26)
-  ✔ Link the Space from the alphaXiv paper (shown under the abstract) @done(26-10-26)
-  ✔ Build app and model with tests against the paper's numbers; visually checked locally @done(26-10-26)
+  ✔ Move the write-up and its data in; publish the dataset; CI for Space and dataset @done(26-10-26)
+  ✔ Build app and model with tests against the original write-up's numbers; visually checked locally @done(26-10-26)

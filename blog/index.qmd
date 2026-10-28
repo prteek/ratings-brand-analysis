@@ -55,7 +55,7 @@ c = compare(counts["Apple"], counts["Philips"])
 fits = {"Apple": c.a, "Philips": c.b}
 ```
 
-# Infering latent user preference from product ratings
+# Inferring latent user preference from product ratings
 
 ## Comparing Star Ratings with a Beta-Binomial Model and Profile Likelihood
 
@@ -139,7 +139,7 @@ The mean, though, treats a product as a single number. It ignores the fact that 
 
 Treat a rating of $s$ stars as $y = s - 1$ favourable outcomes out of $n = 4$, and say a user with preference $p$ rates as if $y \sim \text{Binomial}(4, p)$. Ratings are not literally counts of four yes/no trials; this is a working approximation that gives interpretable parameters and sensible pooling.
 
-A single rating then says something about that user's $p$, but not much. For a user who gave 4★ ($y = 3$), the likelihood $L(p) = p^3 (1 - p)$ peaks at $p = 0.75$ yet leaves a wide range of preferences plausible. (For a refresher on likelihood, see this [likelihood primer](https://prteek.github.io/regression_room/posts/likelihood_primer/).)
+A single rating then says something about that user's $p$, but not much. For a user who gave 4★ $y = 3$, the likelihood $L(p) = p^3 (1 - p)$ peaks at $p = 0.75$ yet leaves a wide range of preferences plausible. For a refresher on likelihood, refer Faraway, J. J. (2016).
 
 ```{python}
 p = np.linspace(0.001, 0.999, 300)
@@ -333,5 +333,6 @@ Or open the [Space](https://huggingface.co/spaces/prteek/ratings-compare), type 
 
 - Pawitan, Y. (2013). *In All Likelihood: Statistical Modelling and Inference Using Likelihood*. Oxford University Press.
 - Casella, G. & Berger, R. L. (2002). *Statistical Inference*, 2nd ed. Cengage.
+- Faraway, J. J. (2016). Extending the Linear Model with R, 2nd ed. CRC Press.
 - Virtanen et al. (2020). SciPy 1.0: Fundamental Algorithms for Scientific Computing in Python. *Nature Methods* 17: 261–272. [doi:10.1038/s41592-019-0686-2](https://doi.org/10.1038/s41592-019-0686-2)
 - Wan, Ni, Misra & McAuley (2020). Addressing Marketing Bias in Product Recommendations. *WSDM*. [github.com/MengtingWan/marketBias](https://github.com/MengtingWan/marketBias)

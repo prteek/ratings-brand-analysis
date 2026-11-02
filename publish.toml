@@ -1,0 +1,22 @@
+# Publish to Hugging Face with `hf publish -m "message" [target ...]` (the hf-publish extension:
+# `hf extensions install prteek/hf-publish`; locally `hf auth login` as prteek, in CI HF_TOKEN). Run it as
+# `uv run hf publish ...` to upload with the project's hf.
+default = ["space", "dataset"]
+
+# prteek/ratings-compare: the app, card and requirements, plus the ratings_compare package the app imports
+[targets.space]
+repo = "prteek/ratings-compare"
+type = "space"
+files = { "." = ["space/app.py", "space/README.md", "space/requirements.txt"], "ratings_compare" = ["ratings_compare/__init__.py", "ratings_compare/beta_binomial.py"] }
+
+# prteek/ratings-compare: data/ratings.csv with dataset/README.md as the card
+[targets.dataset]
+repo = "prteek/ratings-compare"
+type = "dataset"
+files = { "." = ["data/ratings.csv", "dataset/README.md"] }
+
+# the post's figures, in the public bucket where the post links them
+[targets.blog]
+type = "bucket"
+bucket = "prteek/assets/ratings-brand-analysis"
+dir = "blog/assets"

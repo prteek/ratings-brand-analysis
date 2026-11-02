@@ -22,7 +22,7 @@ blog/                  Quarto write-up -> markdown for the Hugging Face article 
   thumbnail.png        the article's cover image
 space/                 Gradio app (app.py), Space card and requirements
 dataset/               dataset card
-publish.sh             upload space and/or dataset
+publish.toml           what `hf publish` uploads: space and/or dataset
 wait_for_space.py      wait until the Space runs its latest commit (used by CI)
 tests/                 model checks against the original write-up's numbers, and the app's default example against the data
 ```
@@ -38,7 +38,7 @@ uv run pytest -q
 
 QUARTO_PYTHON=.venv/bin/python quarto render blog/index.qmd # blog markdown + assets/ figures (~10 s)
 uv run python space/app.py                                 # app on http://127.0.0.1:7860
-./publish.sh "message" space                               # publish (targets: space, dataset; default both)
+uv run hf publish -m "message" space                       # publish (targets: space, dataset; default both)
 ```
 
 ## Publishing from CI

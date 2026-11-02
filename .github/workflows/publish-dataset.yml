@@ -18,12 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
-      HF_CLI: hf
+      HF_HUB_DISABLE_UPDATE_CHECK: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install huggingface_hub==2.3.0
+      - name: Install the hf-publish extension
+        run: hf extensions install prteek/hf-publish
       - name: Upload the ratings and the dataset card
-        run: ./publish.sh "Deploy ${GITHUB_SHA::7} from GitHub" dataset
+        run: hf publish -m "Deploy ${GITHUB_SHA::7} from GitHub" dataset

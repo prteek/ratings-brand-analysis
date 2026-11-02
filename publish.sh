@@ -2,7 +2,8 @@
 # Publish to Hugging Face (locally: `hf auth login` as prteek; in CI: HF_TOKEN):
 #   space    prteek/ratings-compare: space/ plus the ratings_compare package the app imports
 #   dataset  prteek/ratings-compare: data/ratings.csv with dataset/README.md as the card
-#   blog     the post's figures (blog/assets/) to prteek/ratings-compare under blog/assets/, where the post links them
+#   blog     the post's figures (blog/assets/) to the public bucket prteek/assets/ratings-brand-analysis/, where the
+#            post links them
 # Usage: ./publish.sh [message] [space|dataset|blog ...]   (default: both)
 # Set HF_CLI=hf to use an installed hf CLI instead of the project environment (as CI does).
 set -euo pipefail
@@ -27,7 +28,7 @@ for t in "${targets[@]}"; do
       cp dataset/README.md "$stage/dataset/README.md"
       "${hf[@]}" upload prteek/ratings-compare "$stage/dataset" . --repo-type dataset --commit-message "$msg" ;;
     blog)
-      "${hf[@]}" upload prteek/ratings-compare blog/assets blog/assets --repo-type dataset --commit-message "$msg" ;;
+      "${hf[@]}" buckets sync blog/assets hf://buckets/prteek/assets/ratings-brand-analysis ;;
     *)
       echo "unknown target: $t" >&2; exit 1 ;;
   esac

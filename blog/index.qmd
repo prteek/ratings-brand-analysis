@@ -1,9 +1,9 @@
 ---
 # The blog post: `QUARTO_PYTHON=.venv/bin/python quarto render blog/index.qmd` (from the repo root) writes
 # ratings-brand-analysis.md next to this file, ready to paste into the Hugging Face article editor, with its figures
-# linked from the Hub (assets-url; upload them first with `./publish.sh <message> blog`). Code cells import
+# linked from the Hub bucket (assets-url; upload them first with `./publish.sh <message> blog`). Code cells import
 # ratings_compare.
-assets-url: https://huggingface.co/datasets/prteek/ratings-compare/resolve/main/blog
+assets-url: https://huggingface.co/buckets/prteek/assets/resolve/ratings-brand-analysis
 format:
   gfm:
     output-file: ratings-brand-analysis
@@ -32,7 +32,7 @@ from ratings_compare.data import APPLE, PHILIPS, load, star_counts
 sns.set_theme(style="whitegrid")
 COLORS = {"Apple": "tab:blue", "Philips": "tab:orange"}
 
-# figures are saved next to the post and linked from the Hub (assets-url)
+# figures are saved next to the post and linked from the Hub bucket (assets-url)
 ASSETS = Path("assets")
 ASSETS.mkdir(exist_ok=True)
 
